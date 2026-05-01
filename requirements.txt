@@ -1,0 +1,7 @@
+# Requirements for Google Earth Engine integration, real-time streaming, Firebase, and mobile data uploads
+
+google-auth==1.35.0
+firebase-admin==5.2.0
+streamlit==0.86.0
+google-cloud-storage==1.42.0
+google-earth-engine==0.1.265

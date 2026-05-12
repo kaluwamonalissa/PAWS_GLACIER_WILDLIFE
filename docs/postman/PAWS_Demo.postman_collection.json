@@ -1,0 +1,465 @@
+{
+  "info": {
+    "_postman_id": "f1c9f14f-d1ec-4d13-9a1f-6bc6f2e780aa",
+    "name": "PAWS Demo Collection",
+    "description": "Demo collection for PAWS Spring Boot + PWA backend. Includes authentication, community incident reporting, manager allocation, ranger response, analytics, and senior-manager admin actions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "password", "value": "password" },
+    { "key": "rancherToken", "value": "" },
+    { "key": "managerToken", "value": "" },
+    { "key": "rangerToken", "value": "" },
+    { "key": "analystToken", "value": "" },
+    { "key": "seniorToken", "value": "" },
+    { "key": "incidentId", "value": "" },
+    { "key": "rangerId", "value": "5" },
+    { "key": "newUserId", "value": "" },
+    { "key": "newUsername", "value": "demo.user" },
+    { "key": "newUserPassword", "value": "password123" }
+  ],
+  "item": [
+    {
+      "name": "00 - Authentication",
+      "item": [
+        {
+          "name": "Login - Rancher",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('rancherToken', body.token);",
+                  "pm.test('Rancher token received', function () { pm.expect(body.token).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"rancher1\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login - Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('managerToken', body.token);",
+                  "pm.test('Manager token received', function () { pm.expect(body.token).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"manager\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login - Ranger",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('rangerToken', body.token);",
+                  "pm.collectionVariables.set('rangerId', String(body.userId || '5'));",
+                  "pm.test('Ranger token received', function () { pm.expect(body.token).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ranger1\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login - Analyst",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('analystToken', body.token);",
+                  "pm.test('Analyst token received', function () { pm.expect(body.token).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"analyst\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login - Senior Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('seniorToken', body.token);",
+                  "pm.test('Senior manager token received', function () { pm.expect(body.token).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"seniormanager\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Register New User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{newUsername}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"fullName\": \"Demo User\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Forgot Password (Stub)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/forgot-password?username=rancher1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Community Demo Flow",
+      "item": [
+        {
+          "name": "Create Incident (Rancher)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body && body.id) { pm.collectionVariables.set('incidentId', String(body.id)); }",
+                  "pm.test('Incident created', function () { pm.expect(body.id).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rancherToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"HUMAN_WILDLIFE_CONFLICT\",\n  \"description\": \"Elephants near fields at dusk\",\n  \"latitude\": -18.915,\n  \"longitude\": 26.48,\n  \"ward\": \"Ward 1 - Dete\",\n  \"species\": \"African Elephant\",\n  \"cropLivestockType\": \"Maize\",\n  \"damageEstimate\": 1200.00\n}"
+            },
+            "url": "{{baseUrl}}/api/incidents"
+          }
+        },
+        {
+          "name": "Get My Incidents (Rancher)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rancherToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/incidents/mine"
+          }
+        },
+        {
+          "name": "Wildlife Categories",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rancherToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/wildlife/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Manager Demo Flow",
+      "item": [
+        {
+          "name": "List Incidents (Optional Filters)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{managerToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/incidents?status=RECEIVED"
+          }
+        },
+        {
+          "name": "Assign Incident to Ranger",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{managerToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/incidents/{{incidentId}}/assign/{{rangerId}}"
+          }
+        },
+        {
+          "name": "Dashboard Summary",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{managerToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/summary"
+          }
+        },
+        {
+          "name": "Heatmap",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{managerToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/incidents/heatmap"
+          }
+        },
+        {
+          "name": "Export Incidents CSV",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{managerToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/export"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Ranger Demo Flow",
+      "item": [
+        {
+          "name": "Respond to Assigned Incident",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rangerToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/incidents/{{incidentId}}/respond"
+          }
+        },
+        {
+          "name": "Update Incident Outcome",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rangerToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actionTaken\": \"Patrol team deployed and used deterrent patrol line\",\n  \"deterrentsUsed\": \"Torches, vuvuzelas\",\n  \"outcome\": \"Herd diverted away from fields\"\n}"
+            },
+            "url": "{{baseUrl}}/api/incidents/{{incidentId}}/update"
+          }
+        },
+        {
+          "name": "Get My Incidents (Ranger)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rangerToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/incidents/mine"
+          }
+        },
+        {
+          "name": "Log Patrol",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rangerToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startLatitude\": -18.92,\n  \"startLongitude\": 26.46,\n  \"endLatitude\": -18.94,\n  \"endLongitude\": 26.49,\n  \"distanceKm\": 3.8,\n  \"snarersRemoved\": 1,\n  \"wildlifeObserved\": 14,\n  \"notes\": \"Routine evening patrol around water pans\",\n  \"ward\": \"Ward 1 - Dete\"\n}"
+            },
+            "url": "{{baseUrl}}/api/patrols"
+          }
+        },
+        {
+          "name": "Create Sighting (multipart/form-data)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{rangerToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "species", "value": "White Rhinoceros", "type": "text" },
+                { "key": "description", "value": "Observed near pan edge", "type": "text" },
+                { "key": "latitude", "value": "-18.905", "type": "text" },
+                { "key": "longitude", "value": "26.472", "type": "text" },
+                { "key": "photo", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/sightings"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Analyst Demo Flow",
+      "item": [
+        {
+          "name": "Get Model Metrics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{analystToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/analytics/model-metrics"
+          }
+        },
+        {
+          "name": "Run What-If Simulation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{analystToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ward\": \"Ward 1 - Dete\",\n  \"additionalRangers\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/analytics/whatif"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Senior Manager Admin",
+      "item": [
+        {
+          "name": "Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const users = pm.response.json();",
+                  "const demo = users.find(u => u.username === pm.collectionVariables.get('newUsername'));",
+                  "if (demo && demo.id) pm.collectionVariables.set('newUserId', String(demo.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{seniorToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/admin/users"
+          }
+        },
+        {
+          "name": "Promote User Role (example: RANGER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{seniorToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/admin/users/{{newUserId}}/role?role=RANGER"
+          }
+        },
+        {
+          "name": "Deactivate User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{seniorToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/admin/users/{{newUserId}}/deactivate"
+          }
+        },
+        {
+          "name": "Activate User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{seniorToken}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/admin/users/{{newUserId}}/activate"
+          }
+        }
+      ]
+    }
+  ]
+}
+

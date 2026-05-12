@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PatrolService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">paws</a> &gt; <a href="index.source.html" class="el_package">za.co.mwm.paws.paws.service</a> &gt; <span class="el_source">PatrolService.java</span></div><h1>PatrolService.java</h1><pre class="source lang-java linenums">package za.co.mwm.paws.paws.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import za.co.mwm.paws.paws.domain.Patrol;
+import za.co.mwm.paws.paws.domain.User;
+import za.co.mwm.paws.paws.dto.PatrolRequest;
+import za.co.mwm.paws.paws.dto.PatrolResponse;
+import za.co.mwm.paws.paws.repository.PatrolRepository;
+import za.co.mwm.paws.paws.repository.UserRepository;
+
+@Service
+@RequiredArgsConstructor
+public class PatrolService {
+
+    private static final String ERROR_USER_NOT_FOUND = &quot;User not found&quot;;
+
+    private final PatrolRepository patrolRepository;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public PatrolResponse logPatrol(final PatrolRequest request, final String username) {
+<span class="fc" id="L26">        final User ranger = userRepository.findByUsername(username)</span>
+<span class="fc" id="L27">                .orElseThrow(() -&gt; new IllegalArgumentException(ERROR_USER_NOT_FOUND));</span>
+
+<span class="fc" id="L29">        final Patrol patrol = Patrol.builder()</span>
+<span class="fc" id="L30">                .ranger(ranger)</span>
+<span class="fc" id="L31">                .startLatitude(request.getStartLatitude())</span>
+<span class="fc" id="L32">                .startLongitude(request.getStartLongitude())</span>
+<span class="fc" id="L33">                .endLatitude(request.getEndLatitude())</span>
+<span class="fc" id="L34">                .endLongitude(request.getEndLongitude())</span>
+<span class="fc" id="L35">                .distanceKm(request.getDistanceKm())</span>
+<span class="fc" id="L36">                .snarersRemoved(request.getSnarersRemoved())</span>
+<span class="fc" id="L37">                .wildlifeObserved(request.getWildlifeObserved())</span>
+<span class="fc" id="L38">                .notes(request.getNotes())</span>
+<span class="fc" id="L39">                .ward(request.getWard())</span>
+<span class="fc" id="L40">                .startedAt(LocalDateTime.now())</span>
+<span class="fc" id="L41">                .build();</span>
+
+<span class="fc" id="L43">        final Patrol saved = patrolRepository.save(patrol);</span>
+<span class="fc" id="L44">        return toResponse(saved);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;PatrolResponse&gt; getAllPatrols() {
+<span class="fc" id="L49">        return patrolRepository.findAll().stream().map(this::toResponse).toList();</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;PatrolResponse&gt; getMyPatrols(final String username) {
+<span class="fc" id="L54">        final User ranger = userRepository.findByUsername(username)</span>
+<span class="fc" id="L55">                .orElseThrow(() -&gt; new IllegalArgumentException(ERROR_USER_NOT_FOUND));</span>
+<span class="fc" id="L56">        return patrolRepository.findByRangerId(ranger.getId()).stream()</span>
+<span class="fc" id="L57">                .map(this::toResponse)</span>
+<span class="fc" id="L58">                .toList();</span>
+    }
+
+    private PatrolResponse toResponse(final Patrol patrol) {
+<span class="fc" id="L62">        return PatrolResponse.builder()</span>
+<span class="fc" id="L63">                .id(patrol.getId())</span>
+<span class="fc" id="L64">                .rangerName(patrol.getRanger().getFullName())</span>
+<span class="fc" id="L65">                .startLatitude(patrol.getStartLatitude())</span>
+<span class="fc" id="L66">                .startLongitude(patrol.getStartLongitude())</span>
+<span class="fc" id="L67">                .endLatitude(patrol.getEndLatitude())</span>
+<span class="fc" id="L68">                .endLongitude(patrol.getEndLongitude())</span>
+<span class="fc" id="L69">                .distanceKm(patrol.getDistanceKm())</span>
+<span class="fc" id="L70">                .snarersRemoved(patrol.getSnarersRemoved())</span>
+<span class="fc" id="L71">                .wildlifeObserved(patrol.getWildlifeObserved())</span>
+<span class="fc" id="L72">                .notes(patrol.getNotes())</span>
+<span class="fc" id="L73">                .ward(patrol.getWard())</span>
+<span class="fc" id="L74">                .startedAt(patrol.getStartedAt())</span>
+<span class="fc" id="L75">                .endedAt(patrol.getEndedAt())</span>
+<span class="fc" id="L76">                .build();</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

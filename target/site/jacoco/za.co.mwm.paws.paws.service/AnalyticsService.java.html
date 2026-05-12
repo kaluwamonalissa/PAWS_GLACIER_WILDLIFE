@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnalyticsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">paws</a> &gt; <a href="index.source.html" class="el_package">za.co.mwm.paws.paws.service</a> &gt; <span class="el_source">AnalyticsService.java</span></div><h1>AnalyticsService.java</h1><pre class="source lang-java linenums">package za.co.mwm.paws.paws.service;
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import za.co.mwm.paws.paws.dto.ModelMetricsResponse;
+import za.co.mwm.paws.paws.dto.ModelMetricsResponse.WardRiskScore;
+import za.co.mwm.paws.paws.dto.WhatIfRequest;
+import za.co.mwm.paws.paws.dto.WhatIfResponse;
+
+@Service
+<span class="fc" id="L11">public class AnalyticsService {</span>
+
+    private static final double STUBBED_AUC = 0.87;
+    private static final double STUBBED_PRECISION_AT_K = 0.74;
+    private static final String STUBBED_LAST_RETRAINED = &quot;2026-05-03T01:00:00&quot;;
+    private static final String STUBBED_MODEL_VERSION = &quot;hwange-hwc-v2.1&quot;;
+    private static final double RESPONSE_TIME_REDUCTION_PER_RANGER = 0.18;
+
+    public ModelMetricsResponse getModelMetrics() {
+<span class="fc" id="L20">        return ModelMetricsResponse.builder()</span>
+<span class="fc" id="L21">                .auc(STUBBED_AUC)</span>
+<span class="fc" id="L22">                .precisionAtK(STUBBED_PRECISION_AT_K)</span>
+<span class="fc" id="L23">                .lastRetrained(STUBBED_LAST_RETRAINED)</span>
+<span class="fc" id="L24">                .modelVersion(STUBBED_MODEL_VERSION)</span>
+<span class="fc" id="L25">                .wardRiskScores(stubbedWardRiskScores())</span>
+<span class="fc" id="L26">                .build();</span>
+    }
+
+    public WhatIfResponse simulateWhatIf(final WhatIfRequest request) {
+<span class="fc" id="L30">        final double currentAvg = 2.8;</span>
+<span class="fc" id="L31">        final double projected = Math.max(</span>
+<span class="fc" id="L32">                0.5, currentAvg * (1.0 - RESPONSE_TIME_REDUCTION_PER_RANGER * request.getAdditionalRangers()));</span>
+<span class="fc" id="L33">        final double improvement = ((currentAvg - projected) / currentAvg) * 100.0;</span>
+
+<span class="fc" id="L35">        return WhatIfResponse.builder()</span>
+<span class="fc" id="L36">                .ward(request.getWard())</span>
+<span class="fc" id="L37">                .additionalRangers(request.getAdditionalRangers())</span>
+<span class="fc" id="L38">                .currentAvgResponseTimeHrs(currentAvg)</span>
+<span class="fc" id="L39">                .projectedAvgResponseTimeHrs(Math.round(projected * 10.0) / 10.0)</span>
+<span class="fc" id="L40">                .improvementPct(Math.round(improvement * 10.0) / 10.0)</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">                .recommendation(improvement &gt; 30</span>
+<span class="fc" id="L42">                        ? &quot;High impact — strongly recommended&quot;</span>
+<span class="fc" id="L43">                        : &quot;Moderate impact — consider alongside other wards&quot;)</span>
+<span class="fc" id="L44">                .build();</span>
+    }
+
+    private List&lt;WardRiskScore&gt; stubbedWardRiskScores() {
+<span class="fc" id="L48">        return List.of(</span>
+<span class="fc" id="L49">                wardRisk(&quot;Ward 1 — Dete&quot;, 0.91, &quot;HIGH&quot;),</span>
+<span class="fc" id="L50">                wardRisk(&quot;Ward 2 — Hwange Town&quot;, 0.73, &quot;HIGH&quot;),</span>
+<span class="fc" id="L51">                wardRisk(&quot;Ward 3 — Ngamo&quot;, 0.65, &quot;MEDIUM&quot;),</span>
+<span class="fc" id="L52">                wardRisk(&quot;Ward 4 — Siabuwa&quot;, 0.58, &quot;MEDIUM&quot;),</span>
+<span class="fc" id="L53">                wardRisk(&quot;Ward 5 — Binga&quot;, 0.42, &quot;LOW&quot;),</span>
+<span class="fc" id="L54">                wardRisk(&quot;Ward 6 — Kamativi&quot;, 0.38, &quot;LOW&quot;));</span>
+    }
+
+    private WardRiskScore wardRisk(final String ward, final double score, final String level) {
+<span class="fc" id="L58">        return WardRiskScore.builder().ward(ward).riskScore(score).riskLevel(level).build();</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataInitializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">paws</a> &gt; <a href="index.source.html" class="el_package">za.co.mwm.paws.paws.config</a> &gt; <span class="el_source">DataInitializer.java</span></div><h1>DataInitializer.java</h1><pre class="source lang-java linenums">package za.co.mwm.paws.paws.config;
+
+import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import za.co.mwm.paws.paws.domain.Incident;
+import za.co.mwm.paws.paws.domain.IncidentResponder;
+import za.co.mwm.paws.paws.domain.IncidentStatus;
+import za.co.mwm.paws.paws.domain.IncidentType;
+import za.co.mwm.paws.paws.domain.Patrol;
+import za.co.mwm.paws.paws.domain.Role;
+import za.co.mwm.paws.paws.domain.User;
+import za.co.mwm.paws.paws.repository.IncidentRepository;
+import za.co.mwm.paws.paws.repository.IncidentResponderRepository;
+import za.co.mwm.paws.paws.repository.PatrolRepository;
+import za.co.mwm.paws.paws.repository.UserRepository;
+
+@Component
+@RequiredArgsConstructor
+<span class="fc" id="L24">@Slf4j</span>
+public class DataInitializer implements ApplicationRunner {
+
+    private static final String DEFAULT_PASSWORD   = &quot;password&quot;;
+    private static final String WARD_DETE          = &quot;Ward 1 — Dete&quot;;
+    private static final String WARD_HWANGE        = &quot;Ward 2 — Hwange Town&quot;;
+    private static final String WARD_NGAMO         = &quot;Ward 3 — Ngamo&quot;;
+
+    private final UserRepository userRepository;
+    private final IncidentRepository incidentRepository;
+    private final IncidentResponderRepository incidentResponderRepository;
+    private final PatrolRepository patrolRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public void run(final ApplicationArguments args) {
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (userRepository.count() &gt; 0) {</span>
+<span class="nc" id="L41">            log.info(&quot;Seed data already present — skipping initialisation&quot;);</span>
+<span class="nc" id="L42">            return;</span>
+        }
+
+<span class="fc" id="L45">        log.info(&quot;Seeding PAWS demo data for Hwange National Park...&quot;);</span>
+<span class="fc" id="L46">        final String hash = passwordEncoder.encode(DEFAULT_PASSWORD);</span>
+
+        // Users
+<span class="fc" id="L49">        final User seniorManager  = save(user(&quot;seniormanager&quot;,   &quot;Chief Warden Grace Moyo&quot;,        Role.SENIOR_MANAGER, null,        hash));</span>
+<span class="fc" id="L50">        final User manager        = save(user(&quot;manager&quot;,         &quot;Field Manager Tendai Chuma&quot;,      Role.MANAGER,        null,        hash));</span>
+<span class="fc" id="L51">        final User analyst        = save(user(&quot;analyst&quot;,         &quot;Data Analyst Farai Mutasa&quot;,       Role.ANALYST,        null,        hash));</span>
+<span class="fc" id="L52">        final User teamLeader     = save(user(&quot;teamleader&quot;,      &quot;Team Leader Sipho Ndlovu&quot;,        Role.TEAM_LEADER,    WARD_DETE,   hash));</span>
+<span class="fc" id="L53">        final User ranger1        = save(user(&quot;ranger1&quot;,         &quot;Ranger Blessing Dube&quot;,            Role.RANGER,         WARD_DETE,   hash));</span>
+<span class="fc" id="L54">        final User ranger2        = save(user(&quot;ranger2&quot;,         &quot;Ranger Nomvula Khumalo&quot;,          Role.RANGER,         WARD_HWANGE, hash));</span>
+<span class="fc" id="L55">        final User rancher1       = save(user(&quot;rancher1&quot;,        &quot;Themba Mpofu&quot;,                   Role.RANCHER,        WARD_DETE,   hash));</span>
+<span class="fc" id="L56">        final User rancher2       = save(user(&quot;rancher2&quot;,        &quot;Zanele Sibanda&quot;,                 Role.RANCHER,        WARD_NGAMO,  hash));</span>
+
+        // Incidents within Hwange Main Camp 20km² bbox
+<span class="fc" id="L59">        final Incident i1 = saveIncident(IncidentType.POACHING,                IncidentStatus.RECEIVED,        &quot;Suspected snare near watering hole 3&quot;,      -18.890, 26.445, WARD_DETE,   &quot;African Elephant&quot;, null,       ranger1,    daysAgo(0, 6, 15));</span>
+<span class="fc" id="L60">        final Incident i2 = saveIncident(IncidentType.POACHING,                IncidentStatus.RANGER_ASSIGNED, &quot;Gunshot heard south of Main Camp at dawn&quot;,  -18.965, 26.510, WARD_DETE,   null,               null,       ranger2,    daysAgo(0, 5, 45));</span>
+<span class="fc" id="L61">        final Incident i3 = saveIncident(IncidentType.HUMAN_WILDLIFE_CONFLICT, IncidentStatus.RECEIVED,        &quot;Elephant herd approaching village boundary&quot;,-18.910, 26.475, WARD_HWANGE, &quot;African Elephant&quot;, &quot;Maize&quot;,    rancher1,   daysAgo(0, 7, 0));</span>
+<span class="fc" id="L62">        final Incident i4 = saveIncident(IncidentType.VELD_FIRE,               IncidentStatus.RECEIVED,        &quot;Smoke visible from eastern grasslands&quot;,     -18.930, 26.520, WARD_DETE,   null,               null,       ranger1,    daysAgo(0, 8, 30));</span>
+<span class="fc" id="L63">        final Incident i5 = saveIncident(IncidentType.WATER_PAN,               IncidentStatus.RECEIVED,        &quot;Pan 7 drying up — only 30cm depth&quot;,         -18.945, 26.460, WARD_NGAMO,  null,               null,       ranger2,    daysAgo(0, 9, 0));</span>
+<span class="fc" id="L64">        saveIncident(IncidentType.FORAGE,                  IncidentStatus.RESOLVED,        &quot;Overgrazing in sector B&quot;,                   -18.890, 26.500, WARD_NGAMO,  null,               null,       teamLeader, daysAgo(1, 14, 0));</span>
+<span class="fc" id="L65">        saveIncident(IncidentType.POACHING,                IncidentStatus.RECEIVED,        &quot;Fresh poacher tracks with heavy load&quot;,      -18.975, 26.435, WARD_HWANGE, &quot;White Rhinoceros&quot;,  null,       rancher1,   daysAgo(0, 4, 20));</span>
+<span class="fc" id="L66">        final Incident i8 = saveIncident(IncidentType.HUMAN_WILDLIFE_CONFLICT, IncidentStatus.RANGER_ASSIGNED, &quot;Buffalo blocking main access road&quot;,         -18.920, 26.488, WARD_DETE,   &quot;Buffalo&quot;,          null,       rancher2,   daysAgo(0, 10, 0));</span>
+<span class="fc" id="L67">        saveIncident(IncidentType.WATER_PAN,               IncidentStatus.RECEIVED,        &quot;Pan 2 algae bloom — animals avoiding it&quot;,   -18.895, 26.455, WARD_NGAMO,  null,               null,       ranger1,    daysAgo(0, 11, 0));</span>
+<span class="fc" id="L68">        saveIncident(IncidentType.VELD_FIRE,               IncidentStatus.RESOLVED,        &quot;Small fire contained near gate 1&quot;,          -18.955, 26.498, WARD_HWANGE, null,               null,       ranger2,    daysAgo(1, 16, 30));</span>
+
+        // Assign rangers to incidents
+<span class="fc" id="L71">        i2.setAssignedRanger(ranger1);</span>
+<span class="fc" id="L72">        incidentRepository.save(i2);</span>
+<span class="fc" id="L73">        i8.setAssignedRanger(ranger2);</span>
+<span class="fc" id="L74">        incidentRepository.save(i8);</span>
+
+<span class="fc" id="L76">        incidentResponderRepository.save(IncidentResponder.builder().incident(i2).ranger(ranger1).assignedAt(daysAgo(0, 5, 50)).build());</span>
+<span class="fc" id="L77">        incidentResponderRepository.save(IncidentResponder.builder().incident(i8).ranger(ranger2).assignedAt(daysAgo(0, 10, 5)).build());</span>
+
+        // Sample patrol
+<span class="fc" id="L80">        patrolRepository.save(Patrol.builder()</span>
+<span class="fc" id="L81">                .ranger(ranger1).startLatitude(-18.920).startLongitude(26.460)</span>
+<span class="fc" id="L82">                .endLatitude(-18.945).endLongitude(26.490)</span>
+<span class="fc" id="L83">                .distanceKm(4.2).snarersRemoved(3).wildlifeObserved(12)</span>
+<span class="fc" id="L84">                .notes(&quot;Removed 3 wire snares near waterhole. Observed elephant herd of ~20.&quot;)</span>
+<span class="fc" id="L85">                .ward(WARD_DETE)</span>
+<span class="fc" id="L86">                .startedAt(daysAgo(0, 6, 0)).endedAt(daysAgo(0, 9, 0))</span>
+<span class="fc" id="L87">                .build());</span>
+
+<span class="fc" id="L89">        log.info(&quot;Seed complete: 8 users, 10 incidents, 2 responders, 1 patrol&quot;);</span>
+<span class="fc" id="L90">        log.info(&quot;Credentials (password='password'): seniormanager / manager / analyst / teamleader / ranger1 / ranger2 / rancher1 / rancher2&quot;);</span>
+<span class="fc" id="L91">    }</span>
+
+    private User user(final String username, final String fullName, final Role role,
+            final String ward, final String hash) {
+<span class="fc" id="L95">        return User.builder().username(username).fullName(fullName)</span>
+<span class="fc" id="L96">                .role(role).ward(ward).passwordHash(hash).active(true).build();</span>
+    }
+
+    private User save(final User user) {
+<span class="fc" id="L100">        return userRepository.save(user);</span>
+    }
+
+    private Incident saveIncident(final IncidentType type, final IncidentStatus status,
+            final String description, final double lat, final double lng,
+            final String ward, final String species, final String cropType,
+            final User reportedBy, final LocalDateTime timestamp) {
+<span class="fc" id="L107">        return incidentRepository.save(Incident.builder()</span>
+<span class="fc" id="L108">                .type(type).status(status).description(description)</span>
+<span class="fc" id="L109">                .latitude(lat).longitude(lng).ward(ward)</span>
+<span class="fc" id="L110">                .species(species).cropLivestockType(cropType)</span>
+<span class="fc" id="L111">                .reportedBy(reportedBy).timestamp(timestamp)</span>
+<span class="fc" id="L112">                .build());</span>
+    }
+
+    private LocalDateTime daysAgo(final int days, final int hour, final int minute) {
+<span class="fc" id="L116">        return LocalDateTime.now().minusDays(days).withHour(hour).withMinute(minute).withSecond(0);</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
